@@ -1,0 +1,192 @@
+.search-container {
+
+}
+.gmnoprint {
+  left: 85% !important;
+}
+
+#form-container {
+  position: relative;
+  width: 375px;
+  z-index: 3;
+  top: 20px;
+  margin-left: 20px;
+}
+
+#form {
+  position: relative;
+  left: 20px;
+}
+
+.search-input {
+  padding: 2px;
+}
+
+.glyphicon:hover {
+  cursor: pointer;
+}
+
+.glyphicon-list {
+  position: absolute;
+  left: 0px;
+  top: 10px;
+}
+
+
+.form-control-feedback {
+  z-index: 10;
+}
+
+#gmap {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+#detail-container {
+  display: none;
+  position: absolute;
+  z-index: 3;
+  width: 475px;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  background-color: white;
+  box-shadow: 0px 5px 20px 0px black;
+}
+
+.initially-hidden {
+  display: none;
+}
+
+.logo {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-5%);
+}
+
+.cross {
+  z-index: 2;
+  position: absolute;
+  width: 75px;
+  height: 25px;
+  bottom: 0px;
+  left: 0px;
+}
+
+.cross-logo {
+  bottom: 30px;
+  left: 6px;
+  width: 65px;
+  height: 23px;
+  box-shadow: 2px 2px 5px -1px black;
+}
+
+#pano {
+  height: 300px;
+  display: none;
+}
+
+.gm-iv-address {
+  display: none;
+  visibility: hidden;
+}
+
+.details {
+  background-color: #4285F4;
+}
+
+.detail-address {
+  font-size: 30px;
+  padding: 20px;
+  color: white;
+}
+
+.locations {
+  overflow-x: scroll;
+  margin-left: 30px;
+  margin-right: 30px;
+  top: -30px;
+  position: relative;
+}
+
+.locations-label {
+  display: flex;
+  justify-content: center;
+  padding-left: 10px;
+  padding-right: 10px;
+
+}
+
+.location-image {
+  width: 150px;
+  height: 100px;
+  padding: 10px;
+}
+
+.rows {
+  display: flex;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.chevron {
+  z-index: 3;
+  width: 15px;
+  color: #a8a9ea;
+
+}
+
+.chevron:hover {
+  cursor: pointer;
+  color: #5557c3;
+}
+
+#left {
+  position: relative;
+  top: 41px;
+}
+
+#right {
+  position: relative;
+  bottom: 100px;
+  left: 446px;
+}
+
+hr {
+  width: 100%;
+  margin-bottom: 10px;
+  margin-top: 0px;
+  border-top: 1px solid #cccaca;
+  bottom: 28px;
+  position: relative;
+}
+
+.location-label-text {
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+.detail-footer {
+  bottom: 22px;
+  position: relative;
+}
+
+.no-overflow {
+  overflow: hidden;
+}
+
+.detail-bottom {
+  height: 312px;
+}
