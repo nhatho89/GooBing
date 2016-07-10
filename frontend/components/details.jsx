@@ -95,6 +95,7 @@ var Details = React.createClass({
             <Location location={location}/>
           )
         })
+
         allLoc = (
           <div className="detail-bottom">
             <div className="locations-label center">
@@ -122,14 +123,11 @@ var Details = React.createClass({
       } else {
         // debugger
         allLoc = (
-          <div>
-
+          <div className="no-loc">
           </div>
         )
       }
     }
-
-
 
     return (
       <div id="detail-container" className="initially-hidden">

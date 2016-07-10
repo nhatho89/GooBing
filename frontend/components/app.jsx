@@ -12,6 +12,10 @@ var App = React.createClass({
     }
   },
 
+  componentDidMount: function() {
+    $('<audio id="chatAudio"><source src="./image/bing.mp3" type="audio/mpeg"></audio>').appendTo('body');
+  },
+
   toggleDetail: function() {
     this.setState({
       showDetail: !this.state.showDetail

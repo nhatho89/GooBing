@@ -42,6 +42,7 @@ var Search = React.createClass({
         alert( 'Geocode was not successful for the following reason: ' + status );
       }
     });
+    $('#chatAudio')[0].play();
   },
 
   handleClick: function(e) {

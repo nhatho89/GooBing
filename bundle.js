@@ -19705,6 +19705,10 @@
 	    };
 	  },
 	
+	  componentDidMount: function () {
+	    $('<audio id="chatAudio"><source src="./image/bing.mp3" type="audio/mpeg"></audio>').appendTo('body');
+	  },
+	
 	  toggleDetail: function () {
 	    this.setState({
 	      showDetail: !this.state.showDetail
@@ -19776,6 +19780,7 @@
 	        alert('Geocode was not successful for the following reason: ' + status);
 	      }
 	    });
+	    $('#chatAudio')[0].play();
 	  },
 	
 	  handleClick: function (e) {
@@ -26895,6 +26900,7 @@
 	        locations = this.state.details.photos.map(function (location) {
 	          return React.createElement(Location, { location: location });
 	        });
+	
 	        allLoc = React.createElement(
 	          'div',
 	          { className: 'detail-bottom' },
@@ -26935,7 +26941,7 @@
 	        );
 	      } else {
 	        // debugger
-	        allLoc = React.createElement('div', null);
+	        allLoc = React.createElement('div', { className: 'no-loc' });
 	      }
 	    }
 	
