@@ -32,9 +32,14 @@
   top: 10px;
 }
 
+.glyphicon-search {
+  position: absolute;
+  left: 355px;
+  top: 10px;
+}
 
-.form-control-feedback {
-  z-index: 10;
+.glyphicon-search:hover {
+  cursor: pointer;
 }
 
 #gmap {

@@ -25,6 +25,7 @@ var Map = React.createClass({
     };
     this.markers = [];
     this.map = new google.maps.Map(map, mapOptions);
+    
   },
 
   componentWillUnmount: function() {
@@ -55,7 +56,7 @@ var Map = React.createClass({
       that.setState({
         center: {
           lat: location.geometry.location.lat(),
-          lng: location.geometry.location.lng() - (coor.b.f - coor.b.b)
+          lng: location.geometry.location.lng() + (coor.b.f - coor.b.b)
         }
       })
       coor.b.f = coor.b.f + (coor.b.b - coor.b.f)

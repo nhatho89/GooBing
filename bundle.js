@@ -19692,7 +19692,7 @@
 	var React = __webpack_require__(1);
 	var PropTypes = React.PropTypes;
 	var Search = __webpack_require__(160);
-	var Map = __webpack_require__(167);
+	var Map = __webpack_require__(161);
 	var Details = __webpack_require__(186);
 	
 	var App = React.createClass({
@@ -19733,7 +19733,7 @@
 
 	var React = __webpack_require__(1);
 	var PropTypes = React.PropTypes;
-	var MapActions = __webpack_require__(161);
+	var MapActions = __webpack_require__(185);
 	
 	var Search = React.createClass({
 	  displayName: 'Search',
@@ -19747,17 +19747,19 @@
 	  },
 	
 	  componentDidMount: function () {
+	    // Adds autocomplete for address search query box
 	    function initialize() {
 	      var input = document.getElementsByClassName('form-control')[0];
 	      var autocomplete = new google.maps.places.Autocomplete(input);
 	    }
-	
 	    google.maps.event.addDomListener(window, 'load', initialize);
 	  },
 	
 	  getGeoCode: function () {
+	    // debugger
 	    var geocoder = new google.maps.Geocoder();
 	    var that = this;
+	    // debugger
 	
 	    geocoder.geocode({ 'address': this.state.search }, function (results, status) {
 	      if (status == google.maps.GeocoderStatus.OK) {
@@ -19778,25 +19780,71 @@
 	
 	  handleClick: function (e) {
 	    e.preventDefault();
-	    $('#detail-container').animate({ 'width': 'toggle' }, 300);
-	
-	    this.setState({
-	      show: !this.state.show
-	    });
-	
-	    this.props.toggleDetail();
+	    if (e.target.className === "glyphicon glyphicon-search") {
+	      this.getGeoCode();
+	    } else {
+	      $('#detail-container').animate({ 'width': 'toggle' }, 300);
+	      this.setState({
+	        show: !this.state.show
+	      });
+	      this.props.toggleDetail();
+	    }
 	  },
 	
 	  handleSubmit: function (e) {
+	    console.log('submit');
 	    e.preventDefault();
-	    this.getGeoCode();
+	    var that = this;
+	    // debugger
+	    this.setState({
+	      search: e.target.childNodes[0].childNodes[0].value
+	    });
+	
+	    setTimeout(function () {
+	      // debugger
+	      that.getGeoCode();
+	    }, 200);
 	  },
 	
 	  handleChange: function (e) {
 	    e.preventDefault();
+	
 	    this.setState({
 	      search: e.target.value
 	    });
+	
+	    // var items = $(".pac-container")[0].childNodes;
+	    var that = this;
+	    setTimeout(function () {
+	
+	      $('.pac-item').on('mousedown', function (e) {
+	        e.preventDefault();
+	        console.log(e.target);
+	        if (e.target.tagName === "DIV") {
+	          that.setState({
+	            search: e.target.children[1].innerText + ' ' + e.target.children[2].innerText
+	          });
+	        } else if (e.target.tagName === "SPAN") {
+	          that.setState({
+	            search: e.target.parentNode.children[1].innerText + ' ' + e.target.parentNode.children[2].innerText
+	          });
+	        }
+	        $(".pac-container").toggle();
+	        that.getGeoCode();
+	      }.bind(that));
+	      // if (items.length > 0) {
+	      //   for (var i = 0; i < items.length; i++) {
+	      //     items[i].addEventListener('mousedown',function(e) {
+	      //       e.preventDefault();
+	      //       console.log(e.target);
+	      //       that.setState({
+	      //         search: e.target.children[1].innerText + ' ' + e.target.children[2].innerText
+	      //       })
+	      //       that.getGeoCode()
+	      //     }.bind(that))
+	      //   }
+	      // }
+	    }, 300);
 	  },
 	
 	  render: function () {
@@ -19810,8 +19858,8 @@
 	        React.createElement(
 	          'div',
 	          { className: 'form-group' },
-	          React.createElement('input', { className: 'form-control has-feedback', onChange: this.handleChange, type: 'text', placeholder: 'Search GooBing Maps' }),
-	          React.createElement('span', { className: 'glyphicon glyphicon-search form-control-feedback' })
+	          React.createElement('input', { className: 'form-control', onChange: this.handleChange, type: 'text', placeholder: 'Search GooBing Maps' }),
+	          React.createElement('span', { className: 'glyphicon glyphicon-search', onClick: this.handleClick })
 	        )
 	      )
 	    );
@@ -19825,43 +19873,135 @@
 /* 161 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Dispatcher = __webpack_require__(162);
-	var Constants = __webpack_require__(166);
+	var React = __webpack_require__(1);
+	var PropTypes = React.PropTypes;
+	var MapStore = __webpack_require__(162);
+	var MapActions = __webpack_require__(185);
 	
-	var MapActions = {
-	  updateMap: function (value) {
-	    Dispatcher.dispatch({
-	      actionType: Constants.UPDATE_MAP,
-	      loc: value
-	    });
+	var Map = React.createClass({
+	  displayName: 'Map',
+	
+	  getInitialState: function () {
+	    return {
+	      location: MapStore.location(),
+	      center: {
+	        lat: 37.7758,
+	        lng: -122.435
+	      }
+	    };
 	  },
 	
-	  getDetail: function (place_id, map) {
-	    var request = {
-	      placeId: place_id
+	  componentDidMount: function () {
+	    this.mapListener = MapStore.addListener(this._onChange);
+	    //creates main map once on document loaded
+	    var map = document.getElementById('gmap');
+	    var mapOptions = {
+	      draggable: true,
+	      center: this.state.center,
+	      zoom: 10
 	    };
+	    this.markers = [];
+	    this.map = new google.maps.Map(map, mapOptions);
+	  },
 	
-	    var service = new google.maps.places.PlacesService(map);
-	    service.getDetails(request, function (details, status) {
-	      Dispatcher.dispatch({
-	        actionType: Constants.RECEIVE_DETAIL,
-	        details: details
+	  componentWillUnmount: function () {
+	    this.mapListener.remove();
+	  },
+	
+	  getBounds: function (location) {
+	    return new google.maps.LatLngBounds(location.geometry.viewport.getSouthWest(), location.geometry.viewport.getNorthEast());
+	  },
+	
+	  removeMarkers: function () {
+	    for (var i = 0; i < this.markers.length; i++) {
+	      this.markers[i].setMap(null);
+	    }
+	  },
+	
+	  _onChange: function () {
+	    var that = this;
+	    // timeout is used to allow the pano map to be rendered
+	    setTimeout(function () {
+	      var location = MapStore.location();
+	      that.removeMarkers();
+	      MapActions.getDetail(location.place_id, that.map);
+	      var coor = that.getBounds(location);
+	      that.setState({
+	        center: {
+	          lat: location.geometry.location.lat(),
+	          lng: location.geometry.location.lng() + (coor.b.f - coor.b.b)
+	        }
 	      });
-	    });
-	  }
-	};
+	      coor.b.f = coor.b.f + (coor.b.b - coor.b.f);
 	
-	module.exports = MapActions;
+	      that.createMarker(location);
+	      // fit searched object boundaries on the map
+	      // could vary from city block to entire country
+	      that.map.fitBounds(coor);
+	    }, 300);
+	  },
+	
+	  createMarker: function (location) {
+	    var placeLoc = location.geometry.location;
+	    var marker = new google.maps.Marker({
+	      map: this.map,
+	      position: location.geometry.location
+	    });
+	    this.markers.push(marker);
+	  },
+	
+	  render: function () {
+	    return React.createElement(
+	      'div',
+	      { id: 'gmap', className: 'gmap', ref: 'map' },
+	      'Map'
+	    );
+	  }
+	
+	});
+	
+	module.exports = Map;
 
 /***/ },
 /* 162 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Dispatcher = __webpack_require__(163).Dispatcher;
-	module.exports = new Dispatcher();
+	var Dispatcher = __webpack_require__(163);
+	var Store = __webpack_require__(167).Store;
+	var Constants = __webpack_require__(184);
+	
+	var MapStore = new Store(Dispatcher);
+	
+	var _location = {};
+	
+	receiveLoc = function (loc) {
+	  _location = loc;
+	};
+	
+	MapStore.location = function () {
+	  return _location;
+	};
+	
+	MapStore.__onDispatch = function (payload) {
+	  switch (payload.actionType) {
+	    case Constants.UPDATE_MAP:
+	      receiveLoc(payload.loc);
+	      MapStore.__emitChange();
+	      break;
+	  }
+	};
+	
+	module.exports = MapStore;
 
 /***/ },
 /* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Dispatcher = __webpack_require__(164).Dispatcher;
+	module.exports = new Dispatcher();
+
+/***/ },
+/* 164 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19873,11 +20013,11 @@
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 */
 	
-	module.exports.Dispatcher = __webpack_require__(164);
+	module.exports.Dispatcher = __webpack_require__(165);
 
 
 /***/ },
-/* 164 */
+/* 165 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -19899,7 +20039,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var invariant = __webpack_require__(165);
+	var invariant = __webpack_require__(166);
 	
 	var _prefix = 'ID_';
 	
@@ -20114,7 +20254,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 165 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20169,142 +20309,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 166 */
-/***/ function(module, exports) {
-
-	var Constants = {
-	  UPDATE_MAP: "UPDATE_MAP",
-	  RECEIVE_DETAIL: "RECEIVE_DETAIL"
-	};
-	
-	module.exports = Constants;
-
-/***/ },
 /* 167 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	var PropTypes = React.PropTypes;
-	var MapStore = __webpack_require__(168);
-	var MapActions = __webpack_require__(161);
-	
-	var Map = React.createClass({
-	  displayName: 'Map',
-	
-	  getInitialState: function () {
-	    return {
-	      location: MapStore.location(),
-	      center: {
-	        lat: 37.7758,
-	        lng: -122.435
-	      }
-	    };
-	  },
-	
-	  componentDidMount: function () {
-	    this.mapListener = MapStore.addListener(this._onChange);
-	    //creates main map once on document loaded
-	    var map = document.getElementById('gmap');
-	    var mapOptions = {
-	      draggable: true,
-	      center: this.state.center,
-	      zoom: 10
-	    };
-	    this.markers = [];
-	    this.map = new google.maps.Map(map, mapOptions);
-	  },
-	
-	  componentWillUnmount: function () {
-	    this.mapListener.remove();
-	  },
-	
-	  getBounds: function (location) {
-	    return new google.maps.LatLngBounds(location.geometry.viewport.getSouthWest(), location.geometry.viewport.getNorthEast());
-	  },
-	
-	  removeMarkers: function () {
-	    for (var i = 0; i < this.markers.length; i++) {
-	      this.markers[i].setMap(null);
-	    }
-	  },
-	
-	  _onChange: function () {
-	    var that = this;
-	    // timeout is used to allow the pano map to be rendered
-	    setTimeout(function () {
-	      var location = MapStore.location();
-	      that.removeMarkers();
-	      MapActions.getDetail(location.place_id, that.map);
-	      var coor = that.getBounds(location);
-	      that.setState({
-	        center: {
-	          lat: location.geometry.location.lat(),
-	          lng: location.geometry.location.lng() - (coor.b.f - coor.b.b)
-	        }
-	      });
-	      coor.b.f = coor.b.f + (coor.b.b - coor.b.f);
-	
-	      that.createMarker(location);
-	      // fit searched object boundaries on the map
-	      // could vary from city block to entire country
-	      that.map.fitBounds(coor);
-	    }, 300);
-	  },
-	
-	  createMarker: function (location) {
-	    var placeLoc = location.geometry.location;
-	    var marker = new google.maps.Marker({
-	      map: this.map,
-	      position: location.geometry.location
-	    });
-	    this.markers.push(marker);
-	  },
-	
-	  render: function () {
-	    return React.createElement(
-	      'div',
-	      { id: 'gmap', className: 'gmap', ref: 'map' },
-	      'Map'
-	    );
-	  }
-	
-	});
-	
-	module.exports = Map;
-
-/***/ },
-/* 168 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Dispatcher = __webpack_require__(162);
-	var Store = __webpack_require__(169).Store;
-	var Constants = __webpack_require__(166);
-	
-	var MapStore = new Store(Dispatcher);
-	
-	var _location = {};
-	
-	receiveLoc = function (loc) {
-	  _location = loc;
-	};
-	
-	MapStore.location = function () {
-	  return _location;
-	};
-	
-	MapStore.__onDispatch = function (payload) {
-	  switch (payload.actionType) {
-	    case Constants.UPDATE_MAP:
-	      receiveLoc(payload.loc);
-	      MapStore.__emitChange();
-	      break;
-	  }
-	};
-	
-	module.exports = MapStore;
-
-/***/ },
-/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -20316,15 +20321,15 @@
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 */
 	
-	module.exports.Container = __webpack_require__(170);
-	module.exports.MapStore = __webpack_require__(173);
-	module.exports.Mixin = __webpack_require__(185);
-	module.exports.ReduceStore = __webpack_require__(174);
-	module.exports.Store = __webpack_require__(175);
+	module.exports.Container = __webpack_require__(168);
+	module.exports.MapStore = __webpack_require__(171);
+	module.exports.Mixin = __webpack_require__(183);
+	module.exports.ReduceStore = __webpack_require__(172);
+	module.exports.Store = __webpack_require__(173);
 
 
 /***/ },
-/* 170 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20346,10 +20351,10 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var FluxStoreGroup = __webpack_require__(171);
+	var FluxStoreGroup = __webpack_require__(169);
 	
-	var invariant = __webpack_require__(165);
-	var shallowEqual = __webpack_require__(172);
+	var invariant = __webpack_require__(166);
+	var shallowEqual = __webpack_require__(170);
 	
 	var DEFAULT_OPTIONS = {
 	  pure: true,
@@ -20507,7 +20512,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 171 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20526,7 +20531,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var invariant = __webpack_require__(165);
+	var invariant = __webpack_require__(166);
 	
 	/**
 	 * FluxStoreGroup allows you to execute a callback on every dispatch after
@@ -20588,7 +20593,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 172 */
+/* 170 */
 /***/ function(module, exports) {
 
 	/**
@@ -20643,7 +20648,7 @@
 	module.exports = shallowEqual;
 
 /***/ },
-/* 173 */
+/* 171 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20664,10 +20669,10 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var FluxReduceStore = __webpack_require__(174);
-	var Immutable = __webpack_require__(184);
+	var FluxReduceStore = __webpack_require__(172);
+	var Immutable = __webpack_require__(182);
 	
-	var invariant = __webpack_require__(165);
+	var invariant = __webpack_require__(166);
 	
 	/**
 	 * This is a simple store. It allows caching key value pairs. An implementation
@@ -20793,7 +20798,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 174 */
+/* 172 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20814,10 +20819,10 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var FluxStore = __webpack_require__(175);
+	var FluxStore = __webpack_require__(173);
 	
-	var abstractMethod = __webpack_require__(183);
-	var invariant = __webpack_require__(165);
+	var abstractMethod = __webpack_require__(181);
+	var invariant = __webpack_require__(166);
 	
 	var FluxReduceStore = (function (_FluxStore) {
 	  _inherits(FluxReduceStore, _FluxStore);
@@ -20900,7 +20905,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 175 */
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20919,11 +20924,11 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var _require = __webpack_require__(176);
+	var _require = __webpack_require__(174);
 	
 	var EventEmitter = _require.EventEmitter;
 	
-	var invariant = __webpack_require__(165);
+	var invariant = __webpack_require__(166);
 	
 	/**
 	 * This class should be extended by the stores in your application, like so:
@@ -21083,7 +21088,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 176 */
+/* 174 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -21096,14 +21101,14 @@
 	 */
 	
 	var fbemitter = {
-	  EventEmitter: __webpack_require__(177)
+	  EventEmitter: __webpack_require__(175)
 	};
 	
 	module.exports = fbemitter;
 
 
 /***/ },
-/* 177 */
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -21122,11 +21127,11 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var EmitterSubscription = __webpack_require__(178);
-	var EventSubscriptionVendor = __webpack_require__(180);
+	var EmitterSubscription = __webpack_require__(176);
+	var EventSubscriptionVendor = __webpack_require__(178);
 	
-	var emptyFunction = __webpack_require__(182);
-	var invariant = __webpack_require__(181);
+	var emptyFunction = __webpack_require__(180);
+	var invariant = __webpack_require__(179);
 	
 	/**
 	 * @class BaseEventEmitter
@@ -21300,7 +21305,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 178 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -21321,7 +21326,7 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var EventSubscription = __webpack_require__(179);
+	var EventSubscription = __webpack_require__(177);
 	
 	/**
 	 * EmitterSubscription represents a subscription with listener and context data.
@@ -21353,7 +21358,7 @@
 	module.exports = EmitterSubscription;
 
 /***/ },
-/* 179 */
+/* 177 */
 /***/ function(module, exports) {
 
 	/**
@@ -21407,7 +21412,7 @@
 	module.exports = EventSubscription;
 
 /***/ },
-/* 180 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -21426,7 +21431,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var invariant = __webpack_require__(181);
+	var invariant = __webpack_require__(179);
 	
 	/**
 	 * EventSubscriptionVendor stores a set of EventSubscriptions that are
@@ -21516,7 +21521,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 181 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -21571,7 +21576,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 182 */
+/* 180 */
 /***/ function(module, exports) {
 
 	/**
@@ -21613,7 +21618,7 @@
 	module.exports = emptyFunction;
 
 /***/ },
-/* 183 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -21630,7 +21635,7 @@
 	
 	'use strict';
 	
-	var invariant = __webpack_require__(165);
+	var invariant = __webpack_require__(166);
 	
 	function abstractMethod(className, methodName) {
 	   true ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Subclasses of %s must override %s() with their own implementation.', className, methodName) : invariant(false) : undefined;
@@ -21640,7 +21645,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 184 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -26624,7 +26629,7 @@
 	}));
 
 /***/ },
-/* 185 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -26641,9 +26646,9 @@
 	
 	'use strict';
 	
-	var FluxStoreGroup = __webpack_require__(171);
+	var FluxStoreGroup = __webpack_require__(169);
 	
-	var invariant = __webpack_require__(165);
+	var invariant = __webpack_require__(166);
 	
 	/**
 	 * `FluxContainer` should be preferred over this mixin, but it requires using
@@ -26747,6 +26752,49 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
+/* 184 */
+/***/ function(module, exports) {
+
+	var Constants = {
+	  UPDATE_MAP: "UPDATE_MAP",
+	  RECEIVE_DETAIL: "RECEIVE_DETAIL"
+	};
+	
+	module.exports = Constants;
+
+/***/ },
+/* 185 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Dispatcher = __webpack_require__(163);
+	var Constants = __webpack_require__(184);
+	
+	var MapActions = {
+	  updateMap: function (value) {
+	    Dispatcher.dispatch({
+	      actionType: Constants.UPDATE_MAP,
+	      loc: value
+	    });
+	  },
+	
+	  getDetail: function (place_id, map) {
+	    var request = {
+	      placeId: place_id
+	    };
+	
+	    var service = new google.maps.places.PlacesService(map);
+	    service.getDetails(request, function (details, status) {
+	      Dispatcher.dispatch({
+	        actionType: Constants.RECEIVE_DETAIL,
+	        details: details
+	      });
+	    });
+	  }
+	};
+	
+	module.exports = MapActions;
+
+/***/ },
 /* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -26755,7 +26803,7 @@
 	var DetailStore = __webpack_require__(187);
 	var PopularLocations = __webpack_require__(188);
 	var Location = __webpack_require__(189);
-	var MapStore = __webpack_require__(168);
+	var MapStore = __webpack_require__(162);
 	
 	var Details = React.createClass({
 	  displayName: 'Details',
@@ -26908,9 +26956,9 @@
 /* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Dispatcher = __webpack_require__(162);
-	var Store = __webpack_require__(169).Store;
-	var Constants = __webpack_require__(166);
+	var Dispatcher = __webpack_require__(163);
+	var Store = __webpack_require__(167).Store;
+	var Constants = __webpack_require__(184);
 	
 	var DetailStore = new Store(Dispatcher);
 	
