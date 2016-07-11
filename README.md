@@ -1,4 +1,11 @@
-## LairShare
+## GooBing
+
+## ScreenShot
+
+![GooBing Main Map](./image/main.png)
+
+![GooBing Detail Page](./image/detail.png)
+
 
 [GooBing](https://nhatho89.github.io/GooBing/) is a web application combining the power of Google Maps with bing. Not the browser Bing, but the sound bing.
 
@@ -19,7 +26,7 @@ GooBing was designed and built over the weekend
 
 ## Technology
 
-GooBing is a frontend web application built with ReactJS, CSS and HTML
+GooBing is a frontend web application built with ReactJS, Flux, CSS and HTML
 
 ## Future Implementations
 
