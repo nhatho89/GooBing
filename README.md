@@ -7,8 +7,8 @@
 
 - Integrates Google Maps API for unrestricted searching
 - Autocomplete dropdown for fast search queries via Autocomplete Library
-- Street view panorama displays via Street View Services
-- Popular Locations displayed in result via secondary query to Google Maps Places Library
+- Street view panorama displays in results via Street View Services
+- Popular Locations displayed in results via secondary query to Google Maps Places Library
 - Map boundaries dynamically resize to fit search query via Google Maps Library.
 - Markers placed/removed on center of search location
 

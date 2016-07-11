@@ -69,7 +69,6 @@ var Details = React.createClass({
     }
   },
 
-
   render: function() {
     var details;
     var locations;
@@ -90,9 +89,9 @@ var Details = React.createClass({
       )
 
       if (this.state.details.photos) {
-        locations = this.state.details.photos.map(function(location) {
+        locations = this.state.details.photos.map(function(location,idx) {
           return (
-            <Location location={location}/>
+            <Location key={idx} location={location}/>
           )
         })
 

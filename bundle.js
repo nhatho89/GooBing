@@ -26890,8 +26890,8 @@
 	      );
 	
 	      if (this.state.details.photos) {
-	        locations = this.state.details.photos.map(function (location) {
-	          return React.createElement(Location, { location: location });
+	        locations = this.state.details.photos.map(function (location, idx) {
+	          return React.createElement(Location, { key: idx, location: location });
 	        });
 	
 	        allLoc = React.createElement(
