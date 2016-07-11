@@ -1,7 +1,7 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
 var DetailStore = require('../stores/details');
-var PopularLocations = require('./popular');
+var Logo = require('./logo');
 var Location = require('./location');
 var MapStore = require('../stores/map');
 
@@ -77,7 +77,7 @@ var Details = React.createClass({
     if (Object.keys(this.state.details).length === 0) {
       details = (
         <div>
-          <PopularLocations/>
+          <Logo/>
         </div>
       )
     } else {
@@ -116,14 +116,14 @@ var Details = React.createClass({
             </div>
             <hr/>
             <div className="detail-footer">
-              <PopularLocations/>
+              <Logo/>
             </div>
           </div>
         )
       } else {
-        // debugger
         allLoc = (
           <div className="no-loc">
+            <Logo/>
           </div>
         )
       }

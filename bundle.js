@@ -19760,11 +19760,9 @@
 	  },
 	
 	  getGeoCode: function () {
-	    // debugger
 	    var geocoder = new google.maps.Geocoder();
 	    var that = this;
-	    // debugger
-	
+	    // hits the google map Library to get map data from search.
 	    geocoder.geocode({ 'address': this.state.search }, function (results, status) {
 	      if (status == google.maps.GeocoderStatus.OK) {
 	        MapActions.updateMap(results[0]);
@@ -19777,13 +19775,14 @@
 	          });
 	        }
 	      } else {
-	        alert('Geocode was not successful for the following reason: ' + status);
+	        console.log('Geocode was not successful for the following reason: ' + status);
 	      }
 	    });
 	    $('#chatAudio')[0].play();
 	  },
 	
 	  handleClick: function (e) {
+	    //handles map details animation on left side of application
 	    e.preventDefault();
 	    if (e.target.className === "glyphicon glyphicon-search") {
 	      this.getGeoCode();
@@ -19797,58 +19796,49 @@
 	  },
 	
 	  handleSubmit: function (e) {
-	    console.log('submit');
+	    // handles the search event when clicking the search glass icon
 	    e.preventDefault();
 	    var that = this;
-	    // debugger
 	    this.setState({
 	      search: e.target.childNodes[0].childNodes[0].value
 	    });
 	
 	    setTimeout(function () {
-	      // debugger
 	      that.getGeoCode();
-	    }, 200);
+	    }, 300);
 	  },
 	
 	  handleChange: function (e) {
 	    e.preventDefault();
 	
+	    // updates the search state as you type into the query box
 	    this.setState({
 	      search: e.target.value
 	    });
 	
-	    // var items = $(".pac-container")[0].childNodes;
 	    var that = this;
+	    // triggers setState when you click on any section of the autocomplete dropdown
+	    // timeout is implemented in order to allow state change before firing query event
 	    setTimeout(function () {
-	
 	      $('.pac-item').on('mousedown', function (e) {
 	        e.preventDefault();
-	        console.log(e.target);
 	        if (e.target.tagName === "DIV") {
 	          that.setState({
 	            search: e.target.children[1].innerText + ' ' + e.target.children[2].innerText
 	          });
-	        } else if (e.target.tagName === "SPAN") {
+	        } else if (e.target.className === "pac-matched") {
+	          that.setState({
+	            search: e.target.parentNode.parentNode.children[1].innerText + ' ' + e.target.parentNode.parentNode.children[2].innerText
+	          });
+	        } else if (e.target.className === "pac-item-query" || e.target.tagName === "SPAN") {
 	          that.setState({
 	            search: e.target.parentNode.children[1].innerText + ' ' + e.target.parentNode.children[2].innerText
 	          });
 	        }
-	        $(".pac-container").toggle();
+	
 	        that.getGeoCode();
+	        // $(".pac-container").toggle()
 	      }.bind(that));
-	      // if (items.length > 0) {
-	      //   for (var i = 0; i < items.length; i++) {
-	      //     items[i].addEventListener('mousedown',function(e) {
-	      //       e.preventDefault();
-	      //       console.log(e.target);
-	      //       that.setState({
-	      //         search: e.target.children[1].innerText + ' ' + e.target.children[2].innerText
-	      //       })
-	      //       that.getGeoCode()
-	      //     }.bind(that))
-	      //   }
-	      // }
 	    }, 300);
 	  },
 	
@@ -19889,6 +19879,7 @@
 	  getInitialState: function () {
 	    return {
 	      location: MapStore.location(),
+	      // default starting location is San Francisco
 	      center: {
 	        lat: 37.7758,
 	        lng: -122.435
@@ -19898,7 +19889,7 @@
 	
 	  componentDidMount: function () {
 	    this.mapListener = MapStore.addListener(this._onChange);
-	    //creates main map once on document loaded
+	    // attaches main map once on document loaded
 	    var map = document.getElementById('gmap');
 	    var mapOptions = {
 	      draggable: true,
@@ -19918,6 +19909,7 @@
 	  },
 	
 	  removeMarkers: function () {
+	    // removes all previously placed markers before the current search
 	    for (var i = 0; i < this.markers.length; i++) {
 	      this.markers[i].setMap(null);
 	    }
@@ -19925,7 +19917,8 @@
 	
 	  _onChange: function () {
 	    var that = this;
-	    // timeout is used to allow the pano map to be rendered
+	    // timeout is used to allow the pano map to be rendered first
+	    // otherwise, only portions of the map will be rendered before interrupted
 	    setTimeout(function () {
 	      var location = MapStore.location();
 	      that.removeMarkers();
@@ -19947,6 +19940,7 @@
 	  },
 	
 	  createMarker: function (location) {
+	    // place a single marker on the most recently searched location.
 	    var placeLoc = location.geometry.location;
 	    var marker = new google.maps.Marker({
 	      map: this.map,
@@ -26786,7 +26780,6 @@
 	    var request = {
 	      placeId: place_id
 	    };
-	
 	    var service = new google.maps.places.PlacesService(map);
 	    service.getDetails(request, function (details, status) {
 	      Dispatcher.dispatch({
@@ -26806,7 +26799,7 @@
 	var React = __webpack_require__(1);
 	var PropTypes = React.PropTypes;
 	var DetailStore = __webpack_require__(187);
-	var PopularLocations = __webpack_require__(188);
+	var Logo = __webpack_require__(190);
 	var Location = __webpack_require__(189);
 	var MapStore = __webpack_require__(162);
 	
@@ -26883,7 +26876,7 @@
 	      details = React.createElement(
 	        'div',
 	        null,
-	        React.createElement(PopularLocations, null)
+	        React.createElement(Logo, null)
 	      );
 	    } else {
 	      details = React.createElement(
@@ -26936,12 +26929,15 @@
 	          React.createElement(
 	            'div',
 	            { className: 'detail-footer' },
-	            React.createElement(PopularLocations, null)
+	            React.createElement(Logo, null)
 	          )
 	        );
 	      } else {
-	        // debugger
-	        allLoc = React.createElement('div', { className: 'no-loc' });
+	        allLoc = React.createElement(
+	          'div',
+	          { className: 'no-loc' },
+	          React.createElement(Logo, null)
+	        );
 	      }
 	    }
 	
@@ -26990,14 +26986,38 @@
 	module.exports = DetailStore;
 
 /***/ },
-/* 188 */
+/* 188 */,
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1);
 	var PropTypes = React.PropTypes;
 	
-	var PopularLocations = React.createClass({
-	  displayName: "PopularLocations",
+	var Location = React.createClass({
+	  displayName: 'Location',
+	
+	
+	  render: function () {
+	    return React.createElement(
+	      'div',
+	      null,
+	      React.createElement('img', { className: 'location-image', src: this.props.location.getUrl({ 'maxWidth': 200, 'maxHeight': 200 }) })
+	    );
+	  }
+	
+	});
+	
+	module.exports = Location;
+
+/***/ },
+/* 190 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	var PropTypes = React.PropTypes;
+	
+	var Logo = React.createClass({
+	  displayName: "Logo",
 	
 	
 	  render: function () {
@@ -27010,31 +27030,7 @@
 	
 	});
 	
-	module.exports = PopularLocations;
-
-/***/ },
-/* 189 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(1);
-	var PropTypes = React.PropTypes;
-	
-	var Location = React.createClass({
-	  displayName: 'Location',
-	
-	
-	  render: function () {
-	    // debugger
-	    return React.createElement(
-	      'div',
-	      null,
-	      React.createElement('img', { className: 'location-image', src: this.props.location.getUrl({ 'maxWidth': 200, 'maxHeight': 200 }) })
-	    );
-	  }
-	
-	});
-	
-	module.exports = Location;
+	module.exports = Logo;
 
 /***/ }
 /******/ ]);

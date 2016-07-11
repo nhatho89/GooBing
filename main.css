@@ -114,8 +114,8 @@
 
 .locations {
   overflow-x: scroll;
-  margin-left: 30px;
-  margin-right: 30px;
+  margin-left: 40px;
+  margin-right: 40px;
   top: -30px;
   position: relative;
 }
@@ -167,8 +167,8 @@
 
 #right {
   position: relative;
-  bottom: 100px;
-  left: 446px;
+  bottom: 115px;
+  left: 427px;
 }
 
 hr {
@@ -192,6 +192,13 @@ hr {
 
 .no-overflow {
   overflow: hidden;
+}
+
+.no-loc {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .detail-bottom {

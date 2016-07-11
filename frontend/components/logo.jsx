@@ -1,7 +1,7 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
 
-var PopularLocations = React.createClass({
+var Logo = React.createClass({
 
   render: function() {
     return (
@@ -13,4 +13,4 @@ var PopularLocations = React.createClass({
 
 });
 
-module.exports = PopularLocations;
+module.exports = Logo;

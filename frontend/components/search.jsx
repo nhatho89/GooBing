@@ -22,11 +22,9 @@ var Search = React.createClass({
   },
 
   getGeoCode: function() {
-    // debugger
     var geocoder = new google.maps.Geocoder();
     var that = this;
-    // debugger
-
+    // hits the google map Library to get map data from search.
     geocoder.geocode( { 'address' : this.state.search }, function( results, status ) {
       if( status == google.maps.GeocoderStatus.OK ) {
         MapActions.updateMap(results[0])
@@ -39,13 +37,14 @@ var Search = React.createClass({
           })
         }
       } else {
-        alert( 'Geocode was not successful for the following reason: ' + status );
+        console.log( 'Geocode was not successful for the following reason: ' + status );
       }
     });
     $('#chatAudio')[0].play();
   },
 
   handleClick: function(e) {
+    //handles map details animation on left side of application
     e.preventDefault();
     if (e.target.className === "glyphicon glyphicon-search") {
       this.getGeoCode();
@@ -59,58 +58,49 @@ var Search = React.createClass({
   },
 
   handleSubmit: function(e) {
-    console.log('submit');
+    // handles the search event when clicking the search glass icon
     e.preventDefault();
     var that = this;
-    // debugger
     this.setState({
       search: e.target.childNodes[0].childNodes[0].value
     })
 
     setTimeout(function(){
-      // debugger
       that.getGeoCode();
-    }, 200)
+    }, 300)
   },
 
   handleChange: function(e) {
     e.preventDefault();
 
+    // updates the search state as you type into the query box
     this.setState({
       search: e.target.value
     })
 
-    // var items = $(".pac-container")[0].childNodes;
     var that = this;
+    // triggers setState when you click on any section of the autocomplete dropdown
+    // timeout is implemented in order to allow state change before firing query event
     setTimeout(function(){
-
       $('.pac-item').on('mousedown',function(e){
         e.preventDefault();
-        console.log(e.target);
         if (e.target.tagName === "DIV") {
           that.setState({
             search: e.target.children[1].innerText + ' ' + e.target.children[2].innerText
           })
-        } else if (e.target.tagName === "SPAN") {
+        } else if (e.target.className === "pac-matched") {
+          that.setState({
+            search: e.target.parentNode.parentNode.children[1].innerText + ' ' + e.target.parentNode.parentNode.children[2].innerText
+          })
+        } else if (e.target.className === "pac-item-query" || e.target.tagName === "SPAN") {
           that.setState({
             search: e.target.parentNode.children[1].innerText + ' ' + e.target.parentNode.children[2].innerText
           })
         }
-        $(".pac-container").toggle()
+
         that.getGeoCode()
+        // $(".pac-container").toggle()
       }.bind(that))
-      // if (items.length > 0) {
-      //   for (var i = 0; i < items.length; i++) {
-      //     items[i].addEventListener('mousedown',function(e) {
-      //       e.preventDefault();
-      //       console.log(e.target);
-      //       that.setState({
-      //         search: e.target.children[1].innerText + ' ' + e.target.children[2].innerText
-      //       })
-      //       that.getGeoCode()
-      //     }.bind(that))
-      //   }
-      // }
     },300)
   },
 

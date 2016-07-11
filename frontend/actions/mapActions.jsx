@@ -13,7 +13,6 @@ var MapActions = {
     var request = {
       placeId: place_id
     }
-
     var service = new google.maps.places.PlacesService(map);
     service.getDetails(request, function(details,status) {
       Dispatcher.dispatch({

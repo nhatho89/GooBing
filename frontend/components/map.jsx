@@ -7,6 +7,7 @@ var Map = React.createClass({
   getInitialState: function() {
     return {
       location: MapStore.location(),
+      // default starting location is San Francisco
       center: {
         lat: 37.7758,
         lng: -122.435
@@ -14,9 +15,9 @@ var Map = React.createClass({
     }
   },
 
-  componentDidMount: function(){
+  componentDidMount: function() {
     this.mapListener = MapStore.addListener(this._onChange)
-    //creates main map once on document loaded
+    // attaches main map once on document loaded
     var map = document.getElementById('gmap');
     var mapOptions = {
       draggable: true,
@@ -25,7 +26,7 @@ var Map = React.createClass({
     };
     this.markers = [];
     this.map = new google.maps.Map(map, mapOptions);
-    
+
   },
 
   componentWillUnmount: function() {
@@ -40,6 +41,7 @@ var Map = React.createClass({
   },
 
   removeMarkers: function() {
+    // removes all previously placed markers before the current search
     for(var i = 0; i < this.markers.length; i++){
         this.markers[i].setMap(null);
     }
@@ -47,7 +49,8 @@ var Map = React.createClass({
 
   _onChange: function() {
     var that = this;
-    // timeout is used to allow the pano map to be rendered
+    // timeout is used to allow the pano map to be rendered first
+    // otherwise, only portions of the map will be rendered before interrupted
     setTimeout(function(){
       var location = MapStore.location();
       that.removeMarkers();
@@ -70,6 +73,7 @@ var Map = React.createClass({
   },
 
   createMarker: function(location) {
+    // place a single marker on the most recently searched location.
     var placeLoc = location.geometry.location;
     var marker = new google.maps.Marker({
       map: this.map,
