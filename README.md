@@ -24,7 +24,7 @@ GooBing was designed and built over a single weekend. It was inspired (heavily) 
 
 ## Technology
 
-GooBing is a frontend web application built with ReactJS, Flux, CSS and HTML
+GooBing is a frontend web application built with ReactJS, Flux, webpack, CSS and HTML
 
 ## Future Implementations
 
